@@ -6,7 +6,7 @@
     <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.0/dist/mindar-image-aframe.prod.js"></script>
     <style>
-      /* Ortadaki hedef karesi */
+      /* Hedef Karesi */
       #scanning-overlay {
         position: fixed; top: 0; left: 0; width: 100%; height: 100%;
         display: flex; align-items: center; justify-content: center;
@@ -22,11 +22,12 @@
     </style>
   </head>
   <body>
+
     <div id="scanning-overlay">
       <div class="target-box"></div>
     </div>
 
-    <a-scene mindar-image="imageTargetSrc: targets%20(1).mind; uiLoading: no;" uiScanning: no;" ..." color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
+    <a-scene mindar-image="imageTargetSrc: targets%20(1).mind; uiLoading: no; uiScanning: no;" color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
       
       <a-assets>
         <video id="aiVideo" src="yzvideo.mp4" preload="auto" crossorigin="anonymous" playsinline></video>
@@ -63,29 +64,26 @@
       const target = document.querySelector('#target-anchor');
       const overlay = document.querySelector('#scanning-overlay');
 
-      // Görsel algılandığında
       target.addEventListener('targetFound', () => {
         overlay.style.display = 'none';
-        // Eğer video bitmediyse videoyu oynat
         if (videoObj.getAttribute('visible')) {
           video.play();
         }
       });
 
-      // Görsel kaybolduğunda
       target.addEventListener('targetLost', () => {
         overlay.style.display = 'flex';
         video.pause();
       });
 
-      // VİDEO BİTTİĞİNDE HOLOGRAMI AÇ
+      // Video bittiğinde hologramı çalıştır
       video.addEventListener('ended', () => {
-        videoObj.setAttribute('visible', 'false'); // Videoyu gizle
-        hologramObj.setAttribute('visible', 'true'); // Dış küreyi göster
-        hologramInner.setAttribute('visible', 'true'); // İç halkayı göster
+        videoObj.setAttribute('visible', 'false');
+        hologramObj.setAttribute('visible', 'true');
+        hologramInner.setAttribute('visible', 'true');
       });
 
-      // Tarayıcı kısıtlamasını aşmak için ekrana dokunma şartı
+      // İlk dokunuşta sesi ve videoyu hazırla
       document.body.addEventListener('click', () => {
         video.play();
         video.pause(); 

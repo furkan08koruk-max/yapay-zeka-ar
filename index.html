@@ -6,36 +6,14 @@
     <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.0/dist/mindar-image-aframe.prod.js"></script>
     <style>
-      /* Tarama çizgisi animasyonu */
-      #scanning-overlay {
-        position: fixed;
-        top: 0; left: 0; width: 100%; height: 100%;
-        display: flex; align-items: center; justify-content: center;
-        z-index: 99; pointer-events: none;
-      }
-      .scanner-line {
-        position: absolute;
-        width: 100%;
-        height: 4px;
-        background: rgba(0, 255, 0, 0.7); /* Yeşil tarama çizgisi */
-        box-shadow: 0 0 15px 5px rgba(0, 255, 0, 0.5);
-        animation: scan 3s linear infinite;
-      }
-      @keyframes scan {
-        0% { top: 0%; }
-        50% { top: 100%; }
-        100% { top: 0%; }
-      }
-      /* Yükleme halkasını gizle */
+      /* Yükleme halkasını ve varsayılan UI elemanlarını tamamen gizliyoruz */
       .mindar-ui-loading { display: none !important; }
+      .mindar-ui-scanning { display: none !important; }
     </style>
   </head>
   <body>
-    <div id="scanning-overlay">
-      <div class="scanner-line"></div>
-    </div>
 
-    <a-scene mindar-image="imageTargetSrc: targets (1).mind; uiLoading: no;"  " color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
+    <a-scene mindar-image="imageTargetSrc: targets.mind; uiLoading: no; uiScanning: no;" color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
       
       <a-assets>
         <video id="aiVideo" src="yzvideo.mp4" preload="auto" loop="true" crossorigin="anonymous" playsinline webkit-playsinline></video>
@@ -46,26 +24,22 @@
       <a-entity id="target-anchor" mindar-image-target="targetIndex: 0">
         <a-video src="#aiVideo" width="1" height="0.56" position="0 0 0"></a-video>
       </a-entity>
+      
     </a-scene>
 
     <script>
       const video = document.querySelector('#aiVideo');
       const target = document.querySelector('#target-anchor');
-      const overlay = document.querySelector('#scanning-overlay');
 
-      // Görsel bulunduğu an tarama çizgisini gizle ve videoyu oynat
       target.addEventListener('targetFound', () => {
-        overlay.style.display = 'none';
         video.play();
       });
 
-      // Görsel kaybolduğunda tarama çizgisini tekrar göster
       target.addEventListener('targetLost', () => {
-        overlay.style.display = 'flex';
         video.pause();
       });
 
-      // İlk açılışta video izni için ekrana dokunma şartı
+      // Tarayıcıların video oynatma kısıtlamasını aşmak için ekrana bir kez dokunulması yeterli
       document.body.addEventListener('click', () => {
         video.play();
         video.pause(); 

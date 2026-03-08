@@ -2,29 +2,30 @@
 <html>
   <head>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Furkan AI AR Projesi - Hologram</title>
+    <title>Furkan AI AR Projesi - Ultra Hologram</title>
     <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.0/dist/mindar-image-aframe.prod.js"></script>
     <style>
-      /* Ortadaki hedef karesi */
       #scanning-overlay {
         position: fixed; top: 0; left: 0; width: 100%; height: 100%;
         display: flex; align-items: center; justify-content: center;
         z-index: 99; pointer-events: none;
       }
       .target-box {
-        width: 250px; height: 250px;
-        border: 3px dashed #00ffff;
-        border-radius: 15px;
-        box-shadow: 0 0 15px #00ffff;
+        width: 260px; height: 260px;
+        border: 3px solid #00ffff;
+        border-radius: 20px;
+        box-shadow: 0 0 20px #00ffff, inset 0 0 20px #00ffff;
+        animation: pulse 2s infinite;
+      }
+      @keyframes pulse {
+        0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; }
       }
       .mindar-ui-loading { display: none !important; }
     </style>
   </head>
   <body>
-    <div id="scanning-overlay">
-      <div class="target-box"></div>
-    </div>
+    <div id="scanning-overlay"><div class="target-box"></div></div>
 
     <a-scene mindar-image="imageTargetSrc: targets%20(1).mind; uiLoading: no; uiScanning: no;" color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
       
@@ -40,57 +41,54 @@
         <a-entity id="hologram-group" visible="false">
           
           <a-sphere 
-            radius="0.4" 
-            position="0 0 0.2" 
-            material="color: #00ffff; transparent: true; opacity: 0.5; wireframe: true;"
-            animation="property: rotation; to: 0 360 360; loop: true; dur: 5000; easing: linear">
+            radius="0.45" 
+            material="color: #bc13fe; transparent: true; opacity: 0.2; wireframe: true;"
+            animation="property: rotation; to: 360 360 0; loop: true; dur: 8000; easing: linear">
           </a-sphere>
 
           <a-sphere 
-            radius="0.25" 
-            position="0 0 0.2" 
-            material="color: #00ffff; transparent: true; opacity: 0.3; shader: flat"
-            animation="property: rotation; to: 360 0 0; loop: true; dur: 3000; easing: linear">
+            radius="0.4" 
+            material="color: #00ffff; transparent: true; opacity: 0.4; wireframe: true;"
+            animation="property: rotation; to: 0 360 0; loop: true; dur: 5000; easing: linear">
           </a-sphere>
 
-          <a-text id="ai-text"
+          <a-torus-knot 
+            radius="0.35" radius-tubular="0.005" p="7" q="3"
+            material="color: #ffffff; transparent: true; opacity: 0.6; shader: flat"
+            animation="property: rotation; to: 0 -360 0; loop: true; dur: 10000; easing: linear">
+          </a-torus-knot>
+
+          <a-text 
             value="AI" 
             color="#ffffff" 
             align="center" 
-            position="0 0.05 0.35"
-            scale="0.8 0.8 0.8"
-            font="https://cdn.aframe.io/fonts/Aileron-Semibold.fnt"
-            shader="flat"
-            material="transparent: true; opacity: 1"
-            animation__scale="property: scale; to: 0.9 0.9 0.9; dir: alternate; loop: true; dur: 1000; easing: easeInOutSine"
-            animation__rotate="property: rotation; to: 0 360 0; loop: true; dur: 4000; easing: linear">
+            position="0 0 0.2"
+            scale="1.2 1.2 1.2"
+            font="https://cdn.aframe.io/fonts/Exo2Bold.fnt"
+            animation__pulse="property: scale; to: 1.3 1.3 1.3; dir: alternate; loop: true; dur: 800; easing: easeInOutQuad"
+            animation__color="property: color; from: #ffffff; to: #00ffff; dir: alternate; loop: true; dur: 1500">
           </a-text>
 
-          <a-ring
-            radius-inner="0.08" radius-outer="0.1"
-            position="0 -0.12 0.35"
-            rotation="90 0 0"
-            material="color: #ffffff; transparent: true; opacity: 0.7; shader: flat"
-            animation="property: scale; to: 1.2 1.2 1.2; dir: alternate; loop: true; dur: 1000; easing: easeInOutSine">
+          <a-ring radius-inner="0.15" radius-outer="0.18" rotation="-90 0 0" position="0 -0.2 0" material="color: #00ffff; transparent: true; opacity: 0.8;">
+            <a-animation property="scale" to="1.5 1.5 1.5" dur="1000" direction="alternate" repeat="indefinite"></a-animation>
           </a-ring>
 
+          <a-light type="point" color="#00ffff" intensity="2" position="0 0 0.5"></a-light>
         </a-entity>
-        </a-entity>
-      
+        
+      </a-entity>
     </a-scene>
 
     <script>
       const video = document.querySelector('#aiVideo');
       const videoObj = document.querySelector('#video-obj');
-      const hologramGroup = document.querySelector('#hologram-group'); // Tüm hologram grubu
+      const hologramGroup = document.querySelector('#hologram-group');
       const target = document.querySelector('#target-anchor');
       const overlay = document.querySelector('#scanning-overlay');
 
       target.addEventListener('targetFound', () => {
         overlay.style.display = 'none';
-        if (videoObj.getAttribute('visible')) {
-          video.play();
-        }
+        if (videoObj.getAttribute('visible')) video.play();
       });
 
       target.addEventListener('targetLost', () => {
@@ -98,16 +96,13 @@
         video.pause();
       });
 
-      // VİDEO BİTTİĞİNDE HOLOGRAMI AÇ
       video.addEventListener('ended', () => {
-        videoObj.setAttribute('visible', 'false'); // Videoyu gizle
-        hologramGroup.setAttribute('visible', 'true'); // Tüm hologram grubunu (küre+yazı) göster
+        videoObj.setAttribute('visible', 'false');
+        hologramGroup.setAttribute('visible', 'true');
       });
 
-      // Tarayıcı kısıtlamasını aşmak için ekrana dokunma şartı
       document.body.addEventListener('click', () => {
-        video.play();
-        video.pause(); 
+        video.play(); video.pause(); 
       }, {once: true});
     </script>
   </body>

@@ -2,10 +2,11 @@
 <html>
   <head>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>AI Hologram Projesi</title>
+    <title>Furkan AI AR Projesi</title>
     <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.0/dist/mindar-image-aframe.prod.js"></script>
     <style>
+      /* Ortadaki hedef karesi */
       #scanning-overlay {
         position: fixed; top: 0; left: 0; width: 100%; height: 100%;
         display: flex; align-items: center; justify-content: center;
@@ -13,8 +14,9 @@
       }
       .target-box {
         width: 250px; height: 250px;
-        border: 4px dashed rgba(0, 150, 255, 0.7); /* AI teması için mavi yaptık */
+        border: 3px dashed #00ffff;
         border-radius: 15px;
+        box-shadow: 0 0 15px #00ffff;
       }
       .mindar-ui-loading { display: none !important; }
     </style>
@@ -28,7 +30,6 @@
       
       <a-assets>
         <video id="aiVideo" src="yzvideo.mp4" preload="auto" crossorigin="anonymous" playsinline></video>
-        <a-asset-item id="aiModel" src="ai_brain.glb"></a-asset-item> 
       </a-assets>
 
       <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
@@ -36,13 +37,20 @@
       <a-entity id="target-anchor" mindar-image-target="targetIndex: 0">
         <a-video id="video-obj" src="#aiVideo" width="1" height="0.56" position="0 0 0" visible="true"></a-video>
         
-        <a-gltf-model id="hologram-obj" src="#aiModel" 
+        <a-sphere id="hologram-obj" 
+          radius="0.4" 
           position="0 0 0.2" 
-          scale="0.5 0.5 0.5" 
           visible="false"
-          material="transparent: true; opacity: 0.6;" 
-          animation="property: rotation; to: 0 360 0; loop: true; dur: 5000">
-        </a-gltf-model>
+          material="color: #00ffff; transparent: true; opacity: 0.5; wireframe: true;"
+          animation="property: rotation; to: 0 360 360; loop: true; dur: 4000; easing: linear">
+        </a-sphere>
+
+        <a-torus-knot id="hologram-inner"
+          radius="0.2" radius-tubular="0.01"
+          visible="false"
+          material="color: #ffffff; transparent: true; opacity: 0.7;"
+          animation="property: rotation; to: 360 0 360; loop: true; dur: 2000; easing: linear">
+        </a-torus-knot>
       </a-entity>
       
     </a-scene>
@@ -51,27 +59,36 @@
       const video = document.querySelector('#aiVideo');
       const videoObj = document.querySelector('#video-obj');
       const hologramObj = document.querySelector('#hologram-obj');
+      const hologramInner = document.querySelector('#hologram-inner');
       const target = document.querySelector('#target-anchor');
       const overlay = document.querySelector('#scanning-overlay');
 
+      // Görsel algılandığında
       target.addEventListener('targetFound', () => {
         overlay.style.display = 'none';
-        video.play();
+        // Eğer video bitmediyse videoyu oynat
+        if (videoObj.getAttribute('visible')) {
+          video.play();
+        }
       });
 
+      // Görsel kaybolduğunda
       target.addEventListener('targetLost', () => {
         overlay.style.display = 'flex';
         video.pause();
       });
 
-      // VİDEO BİTTİĞİNDE BURASI ÇALIŞIR
+      // VİDEO BİTTİĞİNDE HOLOGRAMI AÇ
       video.addEventListener('ended', () => {
         videoObj.setAttribute('visible', 'false'); // Videoyu gizle
-        hologramObj.setAttribute('visible', 'true'); // Hologramı göster
+        hologramObj.setAttribute('visible', 'true'); // Dış küreyi göster
+        hologramInner.setAttribute('visible', 'true'); // İç halkayı göster
       });
 
+      // Tarayıcı kısıtlamasını aşmak için ekrana dokunma şartı
       document.body.addEventListener('click', () => {
-        video.play(); video.pause(); 
+        video.play();
+        video.pause(); 
       }, {once: true});
     </script>
   </body>

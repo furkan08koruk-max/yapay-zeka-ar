@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Furkan AI AR - Video Sesli Hologram</title>
+    <title>Furkan AI AR - Direkt Hologram</title>
     <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.0/dist/mindar-image-aframe.prod.js"></script>
     <style>
@@ -28,25 +28,41 @@
     <a-scene mindar-image="imageTargetSrc: targets%20(1).mind; uiLoading: no; uiScanning: no;" color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
       
       <a-assets>
-        <video id="aiVideo" src="yzvideo.mp4" preload="auto" crossorigin="anonymous" playsinline></video>
+        <video id="aiVideo" src="yzvideo.mp4" preload="auto" crossorigin="anonymous" playsinline loop="true"></video>
       </a-assets>
 
       <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
       <a-entity id="target-anchor" mindar-image-target="targetIndex: 0">
         
-        <a-video id="video-obj" src="#aiVideo" width="1" height="0.56" position="0 0 0" visible="true"></a-video>
-        
-        <a-entity id="hologram-group" visible="false">
-          <a-sphere radius="0.45" material="color: #bc13fe; transparent: true; opacity: 0.2; wireframe: true;"
-            animation="property: rotation; to: 360 360 0; loop: true; dur: 8000; easing: linear"></a-sphere>
+        <a-entity id="hologram-group">
+          
+          <a-sphere 
+            radius="0.45" 
+            material="color: #bc13fe; transparent: true; opacity: 0.2; wireframe: true;"
+            animation="property: rotation; to: 360 360 0; loop: true; dur: 8000; easing: linear">
+          </a-sphere>
 
-          <a-sphere radius="0.4" material="color: #00ffff; transparent: true; opacity: 0.4; wireframe: true;"
-            animation="property: rotation; to: 0 360 0; loop: true; dur: 5000; easing: linear"></a-sphere>
+          <a-sphere 
+            radius="0.4" 
+            material="color: #00ffff; transparent: true; opacity: 0.4; wireframe: true;"
+            animation="property: rotation; to: 0 360 0; loop: true; dur: 5000; easing: linear">
+          </a-sphere>
 
-          <a-text value="AI" color="#ffffff" align="center" position="0 0 0.15" scale="1.2 1.2 1.2"
+          <a-text 
+            value="AI" 
+            color="#ffffff" 
+            align="center" 
+            position="0 0 0.15"
+            scale="1.2 1.2 1.2"
             font="https://cdn.aframe.io/fonts/Exo2Bold.fnt"
-            animation__pulse="property: scale; to: 1.3 1.3 1.3; dir: alternate; loop: true; dur: 800; easing: easeInOutQuad"></a-text>
+            animation__pulse="property: scale; to: 1.3 1.3 1.3; dir: alternate; loop: true; dur: 800; easing: easeInOutQuad"
+            animation__color="property: color; from: #ffffff; to: #00ffff; dir: alternate; loop: true; dur: 1500">
+          </a-text>
+
+          <a-ring radius-inner="0.18" radius-outer="0.2" rotation="-90 0 0" position="0 -0.25 0" 
+            material="color: #00ffff; transparent: true; opacity: 0.7;">
+          </a-ring>
 
           <a-light type="point" color="#00ffff" intensity="2" position="0 0 0.5"></a-light>
         </a-entity>
@@ -56,35 +72,22 @@
 
     <script>
       const video = document.querySelector('#aiVideo');
-      const videoObj = document.querySelector('#video-obj');
-      const hologramGroup = document.querySelector('#hologram-group');
       const target = document.querySelector('#target-anchor');
       const overlay = document.querySelector('#scanning-overlay');
 
+      // Görsel algılandığında
       target.addEventListener('targetFound', () => {
         overlay.style.display = 'none';
-        video.play();
+        video.play(); // Görüntü yok, sadece ses çalacak
       });
 
+      // Görsel kaybolduğunda
       target.addEventListener('targetLost', () => {
         overlay.style.display = 'flex';
         video.pause();
       });
 
-      // VİDEO BİTTİĞİNDE GÖRÜNTÜYÜ KAPAT AMA SESİ DEVAM ETTİR
-      video.addEventListener('ended', () => {
-        // Görüntüyü gizle
-        videoObj.setAttribute('visible', 'false');
-        // Hologramı göster
-        hologramGroup.setAttribute('visible', 'true');
-        
-        // Videoyu başa sar, sesi açık tut ve döngüye sok
-        video.currentTime = 0;
-        video.loop = true;
-        video.play();
-      });
-
-      // Tarayıcı kısıtlaması için
+      // Tarayıcı kısıtlaması için ilk dokunuşta sesi "uyandırıyoruz"
       document.body.addEventListener('click', () => {
         video.play(); video.pause();
       }, {once: true});

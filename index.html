@@ -32,18 +32,18 @@
 
       <a-entity id="target-anchor" mindar-image-target="targetIndex: 0">
         
-        <a-entity id="robot-face" position="0 0 0" rotation="0 180 0">
+        <a-entity id="robot-face" position="0 0 0.1" rotation="0 0 0">
           
-          <a-box width="0.4" height="0.4" depth="0.2" material="color: #ffffff;"></a-box>
+          <a-box width="0.5" height="0.5" depth="0.2" material="color: #ffffff;"></a-box>
           
-          <a-plane width="0.36" height="0.36" position="0 0 0.101" material="color: #000000;"></a-plane>
+          <a-plane width="0.45" height="0.45" position="0 0 0.101" material="color: #000000;"></a-plane>
           
-          <a-circle radius="0.04" color="#00ffff" position="-0.08 0.05 0.102" material="shader: flat;"></a-circle>
-          <a-circle radius="0.04" color="#00ffff" position="0.08 0.05 0.102" material="shader: flat;"></a-circle>
+          <a-circle radius="0.06" color="#00ffff" position="-0.1 0.08 0.102" material="shader: flat;"></a-circle>
+          <a-circle radius="0.06" color="#00ffff" position="0.1 0.08 0.102" material="shader: flat;"></a-circle>
           
-          <a-box id="robot-mouth" width="0.15" height="0.02" depth="0.01" position="0 -0.08 0.102" material="color: #00ffff; shader: flat;"></a-box>
+          <a-box id="robot-mouth" width="0.2" height="0.03" depth="0.01" position="0 -0.12 0.102" material="color: #00ffff; shader: flat;"></a-box>
 
-          <a-light type="point" color="#00ffff" intensity="1" position="0 0 0.5"></a-light>
+          <a-light type="point" color="#00ffff" intensity="1.5" position="0 0 0.5"></a-light>
         </a-entity>
         
       </a-entity>
@@ -58,7 +58,7 @@
         document.querySelector('#scanning-overlay').style.display = 'none';
         video.play();
         
-        // SES ANALİZİ
+        // Ses Analiz Başlangıcı
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         const source = audioCtx.createMediaElementSource(video);
         const analyser = audioCtx.createAnalyser();
@@ -66,18 +66,18 @@
         analyser.connect(audioCtx.destination);
         const dataArray = new Uint8Array(analyser.frequencyBinCount);
 
-        function speak() {
+        function animate() {
           analyser.getByteFrequencyData(dataArray);
           let sum = 0;
-          for(let i=0; i<30; i++) sum += dataArray[i];
-          let vol = sum / 30;
+          for(let i=0; i<40; i++) sum += dataArray[i];
+          let vol = sum / 40;
           
-          // Ağzı sesin şiddetine göre dikeyde büyüt
-          let scaleY = 1 + (vol / 10);
-          mouth.setAttribute('scale', `1 ${scaleY} 1`);
-          requestAnimationFrame(speak);
+          // Ağız dikeyde ses şiddetine göre büyür
+          let s = 1 + (vol / 8);
+          mouth.setAttribute('scale', `1 ${s} 1`);
+          requestAnimationFrame(animate);
         }
-        speak();
+        animate();
       });
 
       target.addEventListener('targetLost', () => {

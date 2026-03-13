@@ -2,24 +2,20 @@
 <html>
   <head>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Furkan AI AR - Gerçek Eilik Robot</title>
+    <title>Furkan AI - Konuşan Robot</title>
     <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.0/dist/mindar-image-aframe.prod.js"></script>
     <style>
-      /* Ortadaki hedef karesi */
       #scanning-overlay {
         position: fixed; top: 0; left: 0; width: 100%; height: 100%;
         display: flex; align-items: center; justify-content: center;
         z-index: 99; pointer-events: none;
       }
       .target-box {
-        width: 260px; height: 260px;
+        width: 250px; height: 250px;
         border: 4px solid #00ffff;
         border-radius: 20px;
-        box-shadow: 0 0 20px #00ffff;
-        animation: pulse 2s infinite;
       }
-      @keyframes pulse { 0% { opacity: 0.4; } 50% { opacity: 1; } 100% { opacity: 0.4; } }
       .mindar-ui-loading { display: none !important; }
     </style>
   </head>
@@ -36,27 +32,18 @@
 
       <a-entity id="target-anchor" mindar-image-target="targetIndex: 0">
         
-        <a-entity id="robot-group" rotation="0 180 0">
+        <a-entity id="robot-face" position="0 0 0" rotation="0 180 0">
           
-          <a-sphere position="0 0.4 0" radius="0.12" material="color: #ffffff; shader: standard; roughness: 0.3; metalness: 0.1;">
-            <a-cylinder position="-0.12 0.4 0" radius="0.03" height="0.01" rotation="0 0 90" material="color: #00cccc; shader: standard;"></a-cylinder>
-            <a-cylinder position="0.12 0.4 0" radius="0.03" height="0.01" rotation="0 0 -90" material="color: #00cccc; shader: standard;"></a-cylinder>
-            
-            <a-cylinder position="0 0 0.08" radius="0.08" height="0.1" rotation="90 0 0" material="color: #000000; shader: standard;">
-              <a-torus position="-0.03 0.02 0.04" radius="0.02" radius-tubular="0.005" rotation="90 0 0" material="color: #00ffff; shader: flat;"></a-torus>
-              <a-torus position="0.03 0.02 0.04" radius="0.02" radius-tubular="0.005" rotation="90 0 0" material="color: #00ffff; shader: flat;"></a-torus>
-              <a-cylinder id="robot-mouth" position="0 -0.04 0.04" radius="0.01" height="0.005" rotation="90 0 0" material="color: #00ffff; shader: flat;"></a-cylinder>
-            </a-cylinder>
-          </a-sphere>
+          <a-box width="0.4" height="0.4" depth="0.2" material="color: #ffffff;"></a-box>
           
-          <a-sphere position="0 0.15 0" radius="0.15" scale="1 1.2 1" material="color: #ffffff; shader: standard; roughness: 0.3;">
-            <a-torus position="0 0 0.08" radius="0.1" radius-tubular="0.005" rotation="0 0 0" material="color: #00cccc; shader: standard;"></a-torus>
-          </a-sphere>
+          <a-plane width="0.36" height="0.36" position="0 0 0.101" material="color: #000000;"></a-plane>
+          
+          <a-circle radius="0.04" color="#00ffff" position="-0.08 0.05 0.102" material="shader: flat;"></a-circle>
+          <a-circle radius="0.04" color="#00ffff" position="0.08 0.05 0.102" material="shader: flat;"></a-circle>
+          
+          <a-box id="robot-mouth" width="0.15" height="0.02" depth="0.01" position="0 -0.08 0.102" material="color: #00ffff; shader: flat;"></a-box>
 
-          <a-cylinder position="0 -0.1 0" radius="0.2" height="0.02" material="color: #ffffff; shader: standard;"></a-cylinder>
-
-          <a-light type="ambient" color="#ffffff" intensity="0.5"></a-light>
-          <a-light type="directional" color="#ffffff" intensity="1" position="-1 1 1"></a-light>
+          <a-light type="point" color="#00ffff" intensity="1" position="0 0 0.5"></a-light>
         </a-entity>
         
       </a-entity>
@@ -65,32 +52,32 @@
     <script>
       const video = document.querySelector('#aiVideo');
       const target = document.querySelector('#target-anchor');
-      const mouth = document.querySelector('#robot-mouth'); // Ağız objesi
+      const mouth = document.querySelector('#robot-mouth');
 
       target.addEventListener('targetFound', () => {
         document.querySelector('#scanning-overlay').style.display = 'none';
-        video.play(); 
+        video.play();
         
-        // Ses Analiz Edici (Ağız Oynatma İçin)
+        // SES ANALİZİ
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         const source = audioCtx.createMediaElementSource(video);
         const analyser = audioCtx.createAnalyser();
         source.connect(analyser);
         analyser.connect(audioCtx.destination);
-        
         const dataArray = new Uint8Array(analyser.frequencyBinCount);
-        
-        function updateMouth() {
+
+        function speak() {
           analyser.getByteFrequencyData(dataArray);
-          const volume = dataArray.reduce((a, b) => a + b, 0) / bufferLength; // Ses şiddetini hesapla
+          let sum = 0;
+          for(let i=0; i<30; i++) sum += dataArray[i];
+          let vol = sum / 30;
           
-          // Ses şiddetine göre ağız yüksekliğini ayarla
-          const mouthScale = 1 + (volume / 10); 
-          mouth.setAttribute('scale', `1 ${mouthScale} 1`);
-          
-          requestAnimationFrame(updateMouth);
+          // Ağzı sesin şiddetine göre dikeyde büyüt
+          let scaleY = 1 + (vol / 10);
+          mouth.setAttribute('scale', `1 ${scaleY} 1`);
+          requestAnimationFrame(speak);
         }
-        updateMouth();
+        speak();
       });
 
       target.addEventListener('targetLost', () => {

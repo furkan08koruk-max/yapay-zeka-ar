@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Furkan AI AR - Robot Hologramı</title>
+    <title>Furkan AI AR - Eilik Robot</title>
     <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.0/dist/mindar-image-aframe.prod.js"></script>
     <style>
@@ -13,11 +13,13 @@
         z-index: 99; pointer-events: none;
       }
       .target-box {
-        width: 250px; height: 250px;
-        border: 3px dashed #00ffff;
-        border-radius: 15px;
-        box-shadow: 0 0 15px #00ffff;
+        width: 260px; height: 260px;
+        border: 4px solid #00ffff;
+        border-radius: 20px;
+        box-shadow: 0 0 20px #00ffff;
+        animation: pulse 2s infinite;
       }
+      @keyframes pulse { 0% { opacity: 0.4; } 50% { opacity: 1; } 100% { opacity: 0.4; } }
       .mindar-ui-loading { display: none !important; }
     </style>
   </head>
@@ -34,29 +36,21 @@
 
       <a-entity id="target-anchor" mindar-image-target="targetIndex: 0">
         
-        <a-entity id="hologram-group" rotation="0 0 0" animation="property: rotation; to: 0 360 0; loop: true; dur: 10000; easing: linear">
+        <a-entity id="robot-group" rotation="0 180 0">
           
-          <a-sphere position="0 0.35 0" radius="0.1" material="color: #00ffff; transparent: true; opacity: 0.7; wireframe: true;"></a-sphere>
+          <a-sphere position="0 0.4 0" radius="0.12" material="color: #ffffff; transparent: true; opacity: 0.6;">
+            <a-cylinder position="0 0 0.08" radius="0.08" height="0.1" rotation="90 0 0" material="color: #000000; transparent: true; opacity: 0.9;">
+              <a-torus position="-0.03 0.02 0.04" radius="0.02" radius-tubular="0.005" rotation="90 0 0" material="color: #00ffff; shader: flat;"></a-torus>
+              <a-torus position="0.03 0.02 0.04" radius="0.02" radius-tubular="0.005" rotation="90 0 0" material="color: #00ffff; shader: flat;"></a-torus>
+              <a-cylinder id="robot-mouth" position="0 -0.04 0.04" radius="0.01" height="0.005" rotation="90 0 0" material="color: #00ffff; shader: flat;"></a-cylinder>
+            </a-cylinder>
+          </a-sphere>
           
-          <a-sphere position="-0.04 0.38 0.08" radius="0.02" material="color: #ffffff; shader: flat;"></a-sphere>
-          <a-sphere position="0.04 0.38 0.08" radius="0.02" material="color: #ffffff; shader: flat;"></a-sphere>
-          
-          <a-box position="0 0.15 0" width="0.2" height="0.3" depth="0.1" material="color: #00ffff; transparent: true; opacity: 0.5; wireframe: true;"></a-box>
-          
-          <a-cylinder position="-0.15 0.2 0" radius="0.02" height="0.2" rotation="0 0 30" material="color: #00ffff; transparent: true; opacity: 0.6; wireframe: true;"></a-cylinder>
-          <a-cylinder position="0.15 0.2 0" radius="0.02" height="0.2" rotation="0 0 -30" material="color: #00ffff; transparent: true; opacity: 0.6; wireframe: true;"></a-cylinder>
-          
-          <a-cylinder position="-0.06 -0.1 0" radius="0.02" height="0.2" material="color: #00ffff; transparent: true; opacity: 0.6; wireframe: true;"></a-cylinder>
-          <a-cylinder position="0.06 -0.1 0" radius="0.02" height="0.2" material="color: #00ffff; transparent: true; opacity: 0.6; wireframe: true;"></a-cylinder>
+          <a-sphere position="0 0.15 0" radius="0.15" scale="1 1.2 1" material="color: #00cccc; transparent: true; opacity: 0.5;">
+            <a-torus position="0 0 0.05" radius="0.13" radius-tubular="0.005" rotation="0 0 0" material="color: #ffffff; transparent: true; opacity: 0.4;"></a-torus>
+          </a-sphere>
 
-          <a-torus-knot radius="0.3" radius-tubular="0.005" p="2" q="3"
-            material="color: #ffffff; transparent: true; opacity: 0.3; wireframe: true;"
-            animation="property: scale; to: 1.1 1.1 1.1; dir: alternate; loop: true; dur: 1000">
-          </a-torus-knot>
-
-          <a-text value="AI" color="#ffffff" align="center" position="0 0.15 0.06" scale="0.8 0.8 0.8"
-            font="https://cdn.aframe.io/fonts/Exo2Bold.fnt">
-          </a-text>
+          <a-cylinder position="0 -0.1 0" radius="0.2" height="0.02" material="color: #ffffff; transparent: true; opacity: 0.7; wireframe: true;"></a-cylinder>
 
           <a-light type="point" color="#00ffff" intensity="2" position="0 0.5 0.5"></a-light>
         </a-entity>
@@ -67,21 +61,42 @@
     <script>
       const video = document.querySelector('#aiVideo');
       const target = document.querySelector('#target-anchor');
-      const overlay = document.querySelector('#scanning-overlay');
+      const mouth = document.querySelector('#robot-mouth'); // Ağız objesi
 
-      // Görseli görünce robotu (sesi) başlat
       target.addEventListener('targetFound', () => {
-        overlay.style.display = 'none';
+        document.querySelector('#scanning-overlay').style.display = 'none';
         video.play(); 
+        
+        // Ses algılayıp ağzı oynatma (Sensör komutu)
+        navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
+          const audioContext = new AudioContext();
+          const source = audioContext.createMediaStreamSource(stream);
+          const analyser = audioContext.createAnalyser();
+          source.connect(analyser);
+          
+          const bufferLength = analyser.frequencyBinCount;
+          const dataArray = new Uint8Array(bufferLength);
+          
+          function updateMouth() {
+            analyser.getByteFrequencyData(dataArray);
+            const volume = dataArray.reduce((a, b) => a + b, 0) / bufferLength; // Ses şiddetini hesapla
+            
+            // Ses şiddetine göre ağız yüksekliğini ayarla
+            const mouthHeight = Math.max(0.005, volume / 10); 
+            mouth.setAttribute('scale', `1 ${mouthHeight} 1`);
+            
+            requestAnimationFrame(updateMouth);
+          }
+          
+          updateMouth();
+        }).catch(err => console.error(err));
       });
 
-      // Görsel kaybolunca durdur
       target.addEventListener('targetLost', () => {
-        overlay.style.display = 'flex';
+        document.querySelector('#scanning-overlay').style.display = 'flex';
         video.pause();
       });
 
-      // İlk tıklamada tarayıcıyı uyandır
       document.body.addEventListener('click', () => {
         video.play(); video.pause();
       }, {once: true});

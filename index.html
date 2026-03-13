@@ -2,24 +2,21 @@
 <html>
   <head>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Furkan AI - Konuşan Robot</title>
+    <title>Furkan AI - Brain Hologram</title>
     <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.0/dist/mindar-image-aframe.prod.js"></script>
     <style>
-      /* Ortadaki hedef karesi */
       #scanning-overlay {
         position: fixed; top: 0; left: 0; width: 100%; height: 100%;
         display: flex; align-items: center; justify-content: center;
         z-index: 99; pointer-events: none;
       }
       .target-box {
-        width: 260px; height: 260px;
+        width: 250px; height: 250px;
         border: 4px solid #00ffff;
         border-radius: 20px;
         box-shadow: 0 0 20px #00ffff;
-        animation: pulse 2s infinite;
       }
-      @keyframes pulse { 0% { opacity: 0.4; } 50% { opacity: 1; } 100% { opacity: 0.4; } }
       .mindar-ui-loading { display: none !important; }
     </style>
   </head>
@@ -36,19 +33,21 @@
 
       <a-entity id="target-anchor" mindar-image-target="targetIndex: 0">
         
-        <a-entity id="robot-face" position="0 0 0.1" rotation="0 0 0">
+        <a-entity id="brain-group" animation="property: rotation; to: 0 360 0; dur: 8000; easing: linear; loop: true">
           
-          <a-box width="0.5" height="0.5" depth="0.2" material="color: #ffffff; shader: standard; roughness: 0.3; metalness: 0.1;"></a-box>
+          <a-sphere position="-0.1 0 0" radius="0.2" scale="1 1.2 1.5" material="color: #00ffff; transparent: true; opacity: 0.3; wireframe: true;"></a-sphere>
+          <a-sphere position="0.1 0 0" radius="0.2" scale="1 1.2 1.5" material="color: #00ffff; transparent: true; opacity: 0.3; wireframe: true;"></a-sphere>
           
-          <a-plane width="0.45" height="0.45" position="0 0 0.101" material="color: #000000; shader: standard;"></a-plane>
-          
-          <a-circle radius="0.06" color="#00ffff" position="-0.1 0.08 0.102" material="shader: flat;"></a-circle>
-          <a-circle radius="0.06" color="#00ffff" position="0.1 0.08 0.102" material="shader: flat;"></a-circle>
-          
-          <a-cylinder id="robot-mouth" position="0 -0.12 0.102" radius="0.006" height="0.03" rotation="90 0 0" material="color: #00ffff; shader: flat;"></a-cylinder>
+          <a-sphere radius="0.15" material="color: #00ffff; transparent: true; opacity: 0.1; shader: flat;"></a-sphere>
 
-          <a-light type="point" color="#00ffff" intensity="1.5" position="0 0.5 0.5"></a-light>
+          <a-text value="AI" position="0 0 0.05" align="center" color="#ffffff" width="3" font="exo2bold" shader="flat" animation="property: opacity; from: 0.5; to: 1; dir: alternate; dur: 1000; loop: true"></a-text>
+          
         </a-entity>
+
+        <a-torus radius="0.4" radius-tubular="0.005" rotation="90 0 0" material="color: #00ffff; transparent: true; opacity: 0.4;"></a-torus>
+        <a-torus radius="0.5" radius-tubular="0.005" rotation="90 45 0" material="color: #00ffff; transparent: true; opacity: 0.2;"></a-torus>
+
+        <a-light type="point" color="#00ffff" intensity="2" position="0 0 0"></a-light>
         
       </a-entity>
     </a-scene>
@@ -56,32 +55,10 @@
     <script>
       const video = document.querySelector('#aiVideo');
       const target = document.querySelector('#target-anchor');
-      const mouth = document.querySelector('#robot-mouth'); // Ağız objesi
 
       target.addEventListener('targetFound', () => {
         document.querySelector('#scanning-overlay').style.display = 'none';
-        video.play(); 
-        
-        // Ses Analiz Edici (Ağız Oynatma İçin)
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        const source = audioCtx.createMediaElementSource(video);
-        const analyser = audioCtx.createAnalyser();
-        source.connect(analyser);
-        analyser.connect(audioCtx.destination);
-        
-        const dataArray = new Uint8Array(analyser.frequencyBinCount);
-        
-        function updateMouth() {
-          analyser.getByteFrequencyData(dataArray);
-          const volume = dataArray.reduce((a, b) => a + b, 0) / bufferLength; // Ses şiddetini hesapla
-          
-          // Ses şiddetine göre ağız yüksekliğini ayarla
-          const mouthScale = 1 + (volume / 10); 
-          mouth.setAttribute('scale', `1 ${mouthScale} 1`);
-          
-          requestAnimationFrame(updateMouth);
-        }
-        updateMouth();
+        video.play();
       });
 
       target.addEventListener('targetLost', () => {
@@ -89,6 +66,7 @@
         video.pause();
       });
 
+      // Video sesi ve dokunma etkileşimi için genel klik
       document.body.addEventListener('click', () => {
         video.play(); video.pause();
       }, {once: true});

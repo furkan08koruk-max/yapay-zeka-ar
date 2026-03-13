@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Furkan AI AR - Eilik Robot</title>
+    <title>Furkan AI AR - Yapay Zeka Projesi</title>
     <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.0/dist/mindar-image-aframe.prod.js"></script>
     <style>
@@ -38,21 +38,25 @@
         
         <a-entity id="robot-group" rotation="0 180 0">
           
-          <a-sphere position="0 0.4 0" radius="0.12" material="color: #ffffff; transparent: true; opacity: 0.6;">
-            <a-cylinder position="0 0 0.08" radius="0.08" height="0.1" rotation="90 0 0" material="color: #000000; transparent: true; opacity: 0.9;">
+          <a-sphere position="0 0.4 0" radius="0.12" material="color: #ffffff; shader: standard; roughness: 0.3; metalness: 0.1;">
+            <a-cylinder position="-0.12 0.4 0" radius="0.03" height="0.01" rotation="0 0 90" material="color: #00cccc; shader: standard;"></a-cylinder>
+            <a-cylinder position="0.12 0.4 0" radius="0.03" height="0.01" rotation="0 0 -90" material="color: #00cccc; shader: standard;"></a-cylinder>
+            
+            <a-cylinder position="0 0 0.08" radius="0.08" height="0.1" rotation="90 0 0" material="color: #000000; shader: standard;">
               <a-torus position="-0.03 0.02 0.04" radius="0.02" radius-tubular="0.005" rotation="90 0 0" material="color: #00ffff; shader: flat;"></a-torus>
               <a-torus position="0.03 0.02 0.04" radius="0.02" radius-tubular="0.005" rotation="90 0 0" material="color: #00ffff; shader: flat;"></a-torus>
               <a-cylinder id="robot-mouth" position="0 -0.04 0.04" radius="0.01" height="0.005" rotation="90 0 0" material="color: #00ffff; shader: flat;"></a-cylinder>
             </a-cylinder>
           </a-sphere>
           
-          <a-sphere position="0 0.15 0" radius="0.15" scale="1 1.2 1" material="color: #00cccc; transparent: true; opacity: 0.5;">
-            <a-torus position="0 0 0.05" radius="0.13" radius-tubular="0.005" rotation="0 0 0" material="color: #ffffff; transparent: true; opacity: 0.4;"></a-torus>
+          <a-sphere position="0 0.15 0" radius="0.15" scale="1 1.2 1" material="color: #ffffff; shader: standard; roughness: 0.3;">
+            <a-torus position="0 0 0.08" radius="0.1" radius-tubular="0.005" rotation="0 0 0" material="color: #00cccc; shader: standard;"></a-torus>
           </a-sphere>
 
-          <a-cylinder position="0 -0.1 0" radius="0.2" height="0.02" material="color: #ffffff; transparent: true; opacity: 0.7; wireframe: true;"></a-cylinder>
+          <a-cylinder position="0 -0.1 0" radius="0.2" height="0.02" material="color: #ffffff; shader: standard;"></a-cylinder>
 
-          <a-light type="point" color="#00ffff" intensity="2" position="0 0.5 0.5"></a-light>
+          <a-light type="ambient" color="#ffffff" intensity="0.5"></a-light>
+          <a-light type="directional" color="#ffffff" intensity="1" position="-1 1 1"></a-light>
         </a-entity>
         
       </a-entity>
@@ -67,29 +71,26 @@
         document.querySelector('#scanning-overlay').style.display = 'none';
         video.play(); 
         
-        // Ses algılayıp ağzı oynatma (Sensör komutu)
-        navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
-          const audioContext = new AudioContext();
-          const source = audioContext.createMediaStreamSource(stream);
-          const analyser = audioContext.createAnalyser();
-          source.connect(analyser);
+        // Ses Analiz Edici (Ağız Oynatma İçin)
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const source = audioCtx.createMediaElementSource(video);
+        const analyser = audioCtx.createAnalyser();
+        source.connect(analyser);
+        analyser.connect(audioCtx.destination);
+        
+        const dataArray = new Uint8Array(analyser.frequencyBinCount);
+        
+        function updateMouth() {
+          analyser.getByteFrequencyData(dataArray);
+          const volume = dataArray.reduce((a, b) => a + b, 0) / bufferLength; // Ses şiddetini hesapla
           
-          const bufferLength = analyser.frequencyBinCount;
-          const dataArray = new Uint8Array(bufferLength);
+          // Ses şiddetine göre ağız yüksekliğini ayarla
+          const mouthScale = 1 + (volume / 10); 
+          mouth.setAttribute('scale', `1 ${mouthScale} 1`);
           
-          function updateMouth() {
-            analyser.getByteFrequencyData(dataArray);
-            const volume = dataArray.reduce((a, b) => a + b, 0) / bufferLength; // Ses şiddetini hesapla
-            
-            // Ses şiddetine göre ağız yüksekliğini ayarla
-            const mouthHeight = Math.max(0.005, volume / 10); 
-            mouth.setAttribute('scale', `1 ${mouthHeight} 1`);
-            
-            requestAnimationFrame(updateMouth);
-          }
-          
-          updateMouth();
-        }).catch(err => console.error(err));
+          requestAnimationFrame(updateMouth);
+        }
+        updateMouth();
       });
 
       target.addEventListener('targetLost', () => {

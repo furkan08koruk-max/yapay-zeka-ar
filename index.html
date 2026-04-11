@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Furkan AI AR - Cyber Void HUD</title>
+    <title>Furkan AI AR - Cyberpunk Data Void</title>
     <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.0/dist/mindar-image-aframe.prod.js"></script>
     <style>
@@ -34,13 +34,26 @@
       <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
       <a-entity id="cyber-bg" visible="false">
-        <a-sky color="#020005"></a-sky>
-        <a-sphere radius="30" material="color: #bc13fe; wireframe: true; transparent: true; opacity: 0.15" animation="property: rotation; to: 0 360 0; loop: true; dur: 80000; easing: linear"></a-sphere>
-        <a-sphere radius="29" material="color: #00ffff; wireframe: true; transparent: true; opacity: 0.05" animation="property: rotation; to: 0 -360 0; loop: true; dur: 60000; easing: linear"></a-sphere>
+        <a-sky color="#000000"></a-sky>
+        
+        <a-sphere radius="30" material="color: #bc13fe; wireframe: true; transparent: true; opacity: 0.1" animation="property: rotation; to: 0 360 0; loop: true; dur: 90000; easing: linear"></a-sphere>
+
+        <a-entity position="-1.5 0 -2" rotation="0 0 0">
+          <a-text value="001011001" color="#00ffff" align="center" position="0 0.8 0" scale="0.3 0.3 0.3" material="shader: flat; transparent: true; opacity: 0.3"></a-text>
+          <a-text value="110010101" color="#00ffff" align="center" position="0 0.4 0" scale="0.3 0.3 0.3" material="shader: flat; transparent: true; opacity: 0.3"></a-text>
+          <a-text value="010101110" color="#00ffff" align="center" position="0 0 0" scale="0.3 0.3 0.3" material="shader: flat; transparent: true; opacity: 0.3"></a-text>
+          <a-text value="101000101" color="#00ffff" align="center" position="0 -0.4 0" scale="0.3 0.3 0.3" material="shader: flat; transparent: true; opacity: 0.3"></a-text>
+        </a-entity>
+
+        <a-entity position="1.5 0 -2" rotation="0 0 0">
+          <a-text value="001011001" color="#bc13fe" align="center" position="0 0.8 0" scale="0.3 0.3 0.3" material="shader: flat; transparent: true; opacity: 0.3"></a-text>
+          <a-text value="110010101" color="#bc13fe" align="center" position="0 0.4 0" scale="0.3 0.3 0.3" material="shader: flat; transparent: true; opacity: 0.3"></a-text>
+          <a-text value="010101110" color="#bc13fe" align="center" position="0 0 0" scale="0.3 0.3 0.3" material="shader: flat; transparent: true; opacity: 0.3"></a-text>
+          <a-text value="101000101" color="#bc13fe" align="center" position="0 -0.4 0" scale="0.3 0.3 0.3" material="shader: flat; transparent: true; opacity: 0.3"></a-text>
+        </a-entity>
       </a-entity>
 
       <a-entity id="target-anchor" mindar-image-target="targetIndex: 0">
-        
         <a-entity position="0 0 0.1">
           
           <a-ring radius-inner="0.48" radius-outer="0.5" material="color: #00ffff; transparent: true; opacity: 0.6; shader: flat" animation="property: rotation; to: 0 0 360; loop: true; dur: 15000; easing: linear"></a-ring>
@@ -74,7 +87,7 @@
 
       target.addEventListener('targetFound', () => {
         overlay.style.display = 'none';
-        cyberBg.setAttribute('visible', 'true'); // Arka planı siyah matrix evrenine çevir
+        cyberBg.setAttribute('visible', 'true'); // Cyberpunk evrenini aç
         video.play();
       });
 

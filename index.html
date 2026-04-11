@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Furkan AI AR - Advanced Cyber HUD</title>
+    <title>Furkan AI AR - Cyber Void HUD</title>
     <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.0/dist/mindar-image-aframe.prod.js"></script>
     <style>
@@ -14,7 +14,7 @@
       .target-box {
         width: 250px; height: 250px;
         border: 2px dashed #00ffff;
-        border-radius: 50%; /* Tarama alanı da yuvarlak ve teknolojik */
+        border-radius: 50%;
         box-shadow: 0 0 30px #00ffff;
         animation: spin 4s linear infinite;
       }
@@ -33,18 +33,21 @@
 
       <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
+      <a-entity id="cyber-bg" visible="false">
+        <a-sky color="#020005"></a-sky>
+        <a-sphere radius="30" material="color: #bc13fe; wireframe: true; transparent: true; opacity: 0.15" animation="property: rotation; to: 0 360 0; loop: true; dur: 80000; easing: linear"></a-sphere>
+        <a-sphere radius="29" material="color: #00ffff; wireframe: true; transparent: true; opacity: 0.05" animation="property: rotation; to: 0 -360 0; loop: true; dur: 60000; easing: linear"></a-sphere>
+      </a-entity>
+
       <a-entity id="target-anchor" mindar-image-target="targetIndex: 0">
         
         <a-entity position="0 0 0.1">
           
           <a-ring radius-inner="0.48" radius-outer="0.5" material="color: #00ffff; transparent: true; opacity: 0.6; shader: flat" animation="property: rotation; to: 0 0 360; loop: true; dur: 15000; easing: linear"></a-ring>
-          
           <a-ring radius-inner="0.42" radius-outer="0.45" theta-length="280" material="color: #00ffff; transparent: true; opacity: 0.8; shader: flat" animation="property: rotation; to: 0 0 -360; loop: true; dur: 10000; easing: linear"></a-ring>
-          
           <a-ring radius-inner="0.38" radius-outer="0.39" theta-length="150" material="color: #bc13fe; transparent: true; opacity: 0.8; shader: flat" animation="property: rotation; to: 0 0 360; loop: true; dur: 8000; easing: linear"></a-ring>
 
           <a-dodecahedron radius="0.25" material="color: #00ffff; transparent: true; opacity: 0.3; wireframe: true" animation="property: rotation; to: 360 360 0; loop: true; dur: 25000; easing: linear"></a-dodecahedron>
-          
           <a-dodecahedron radius="0.18" material="color: #bc13fe; transparent: true; opacity: 0.5; wireframe: true" animation="property: rotation; to: -360 -360 0; loop: true; dur: 20000; easing: linear"></a-dodecahedron>
 
           <a-entity position="0 0 0.15">
@@ -60,7 +63,6 @@
           <a-light type="point" color="#00ffff" intensity="2" position="0 0 0.5"></a-light>
           
         </a-entity>
-        
       </a-entity>
     </a-scene>
 
@@ -68,14 +70,17 @@
       const video = document.querySelector('#aiVideo');
       const target = document.querySelector('#target-anchor');
       const overlay = document.querySelector('#scanning-overlay');
+      const cyberBg = document.querySelector('#cyber-bg');
 
       target.addEventListener('targetFound', () => {
         overlay.style.display = 'none';
+        cyberBg.setAttribute('visible', 'true'); // Arka planı siyah matrix evrenine çevir
         video.play();
       });
 
       target.addEventListener('targetLost', () => {
         overlay.style.display = 'flex';
+        cyberBg.setAttribute('visible', 'false'); // Kamerayı (gerçek dünyayı) geri getir
         video.pause();
       });
 
